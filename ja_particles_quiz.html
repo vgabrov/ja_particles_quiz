@@ -17,7 +17,7 @@
       margin-bottom: 10px;
       font-weight: bold;
     }
-    /* Явно задаём оформление для блока с правильным предложением */
+    /* Блок для отображения полного правильного предложения */
     #correctSentence {
       margin-top: 20px;
       display: block;
@@ -33,7 +33,7 @@
 <body>
   <div id="stats">Правильных: 0 / 0 (0%)</div>
   <div id="quiz"></div>
-  <!-- Блок для показа верного предложения -->
+  <!-- Блок, куда будет добавлено правильное предложение -->
   <div id="correctSentence"></div>
   <button id="checkBtn">Проверить</button>
   <button id="nextBtn">Следующее предложение</button>
@@ -44,6 +44,7 @@
     let totalCorrect = 0;
     let totalAnswered = 0;
 
+    // Функция перемешивания массива
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -54,7 +55,9 @@
     async function loadQuiz() {
       try {
         const response = await fetch('https://raw.githubusercontent.com/vgabrov/ja_particles_quiz/main/processed_sentences_half.json');
-        if (!response.ok) throw new Error('Ошибка загрузки данных');
+        if (!response.ok) {
+          throw new Error('Ошибка загрузки данных');
+        }
         data = await response.json();
         shuffle(data);
         showQuestion();
@@ -66,77 +69,83 @@
     function showQuestion() {
       const quizContainer = document.getElementById('quiz');
       const correctSentenceContainer = document.getElementById('correctSentence');
+      // Очистка старого вопроса и блока с правильным предложением
       quizContainer.innerHTML = '';
-      // Очистка блока с правильным предложением при новом вопросе
       correctSentenceContainer.innerHTML = '';
 
       const item = data[currentIndex];
       if (!item) return;
 
+      // Отображение перевода предложения
       const translation = document.createElement('p');
       translation.innerText = `Перевод: ${item.english_translation}`;
       quizContainer.appendChild(translation);
 
-      const sentenceContainer = document.createElement('p');
+      // Формирование предложения с пропусками для частиц
+      const sentence = document.createElement('p');
       const parts = item.sentence_with_blanks.split('___');
-      parts.forEach((part, idx) => {
-        sentenceContainer.appendChild(document.createTextNode(part));
-        if (idx < item.correct_particles.length) {
+      parts.forEach((part, index) => {
+        sentence.appendChild(document.createTextNode(part));
+        if (index < item.correct_particles.length) {
           const select = document.createElement('select');
           const defaultOption = document.createElement('option');
           defaultOption.value = '';
-          defaultOption.text = '-- выберите --';
+          defaultOption.innerText = '-- выберите --';
           select.appendChild(defaultOption);
           item.all_options.forEach(opt => {
             const option = document.createElement('option');
             option.value = opt;
-            option.text = opt;
+            option.innerText = opt;
             select.appendChild(option);
           });
-          sentenceContainer.appendChild(select);
+          sentence.appendChild(select);
         }
       });
-      quizContainer.appendChild(sentenceContainer);
+      quizContainer.appendChild(sentence);
     }
 
-    document.getElementById('checkBtn').onclick = function() {
+    document.getElementById('checkBtn').addEventListener('click', () => {
       const item = data[currentIndex];
       const selects = document.querySelectorAll('select');
       const correctParticles = item.correct_particles;
       let sentenceScore = 0;
 
-      selects.forEach((sel, idx) => {
-        if (!sel.value) {
-          sel.style.backgroundColor = 'salmon';
-          sel.style.border = '2px solid red';
-        } else if (sel.value.trim() === correctParticles[idx].trim()) {
-          sel.style.backgroundColor = 'lightgreen';
-          sel.style.border = '2px solid green';
+      selects.forEach((select, index) => {
+        const userAnswer = select.value;
+        // Сравнение с trim(), чтобы убрать лишние пробелы
+        if (userAnswer.trim() === correctParticles[index].trim()) {
+          select.style.backgroundColor = 'lightgreen';
+          select.style.border = '2px solid green';
           sentenceScore++;
         } else {
-          sel.style.backgroundColor = 'salmon';
-          sel.style.border = '2px solid red';
+          select.style.backgroundColor = 'salmon';
+          select.style.border = '2px solid red';
         }
-        sel.disabled = true;
+        select.disabled = true;
       });
 
       totalCorrect += sentenceScore;
       totalAnswered += correctParticles.length;
       updateStats();
 
-      // Вывод полного правильного предложения через innerHTML
+      // Создаем новый элемент с правильным предложением и добавляем его в блок
       const correctSentenceContainer = document.getElementById('correctSentence');
-      correctSentenceContainer.innerHTML = `<p class="correct-visual">Верное предложение: ${item.original_sentence}</p>`;
-    };
+      // Очистим содержимое, если оно уже было ранее заполнено
+      correctSentenceContainer.innerHTML = '';
+      const p = document.createElement('p');
+      p.className = 'correct-visual';
+      p.textContent = `Верное предложение: ${item.original_sentence}`;
+      correctSentenceContainer.appendChild(p);
+    });
 
-    document.getElementById('nextBtn').onclick = function() {
+    document.getElementById('nextBtn').addEventListener('click', () => {
       if (currentIndex < data.length - 1) {
         currentIndex++;
         showQuestion();
       } else {
         alert('Это было последнее предложение!');
       }
-    };
+    });
 
     function updateStats() {
       const percent = totalAnswered === 0 ? 0 : ((totalCorrect / totalAnswered) * 100).toFixed(1);
