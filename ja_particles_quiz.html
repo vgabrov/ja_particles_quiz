@@ -85,15 +85,21 @@
 
     document.getElementById('checkBtn').onclick = () => {
       const selects = document.querySelectorAll('select');
+      let correctForCurrent = 0; // Количество правильных ответов для текущего предложения
+      let totalForCurrent = 0; // Общее количество частиц для текущего предложения
+
       selects.forEach(sel => {
+        totalForCurrent++;
         if (sel.value === sel.dataset.correct) {
           sel.style.backgroundColor = 'lightgreen'; // Правильный ответ
-          correctAnswers++;
+          correctForCurrent++;
         } else {
           sel.style.backgroundColor = 'lightcoral'; // Неправильный ответ
         }
       });
-      totalAnswers++;
+
+      correctAnswers += correctForCurrent;
+      totalAnswers += totalForCurrent;
       updateScore();
     };
 
