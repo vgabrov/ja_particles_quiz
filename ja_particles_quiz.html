@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Particle Quiz</title>
+</head>
+<body>
+  <div id="quiz"></div>
+
+  <script>
+    async function loadQuiz() {
+      try {
+        const response = await fetch('processed_sentences.json'); // Загрузка файла
+        if (!response.ok) {
+          throw new Error('Ошибка загрузки данных');
+        }
+        const data = await response.json(); // Преобразование в JSON
+        const container = document.getElementById('quiz');
+
+        // Для каждого элемента в данных
+        data.forEach((item, index) => {
+          const div = document.createElement('div');
+          div.style.marginBottom = '30px';
+
+          // Оригинальное предложение
+          const original = document.createElement('p');
+          original.innerText = `Оригинал: ${item.original_sentence}`;
+          div.appendChild(original);
+
+          // Перевод
+          const translation = document.createElement('p');
+          translation.innerText = `Перевод: ${item.english_translation}`;
+          div.appendChild(translation);
+
+          // Предложение с пропусками
+          const sentence = document.createElement('p');
+          let i = 0;
+          const parts = item.sentence_with_blanks.split('___');
+          parts.forEach((part, idx) => {
+            sentence.append(part);
+            if (idx < item.correct_particles.length) {
+              const select = document.createElement('select');
+              item.all_options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.text = opt;
+                select.appendChild(option);
+              });
+              select.dataset.correct = item.correct_particles[i];
+              i++;
+              sentence.appendChild(select);
+            }
+          });
+          div.appendChild(sentence);
+
+          // Кнопка проверки
+          const checkBtn = document.createElement('button');
+          checkBtn.innerText = 'Проверить';
+          checkBtn.onclick = () => {
+            const selects = div.querySelectorAll('select');
+            selects.forEach(sel => {
+              if (sel.value === sel.dataset.correct) {
+                sel.style.backgroundColor = 'lightgreen'; // Если правильно
+              } else {
+                sel.style.backgroundColor = 'lightcoral'; // Если неправильно
+              }
+            });
+          };
+          div.appendChild(checkBtn);
+
+          // Добавляем в контейнер
+          container.appendChild(div);
+        });
+      } catch (error) {
+        console.error('Ошибка:', error);
+      }
+    }
+
+    loadQuiz();
+  </script>
+</body>
+</html>
