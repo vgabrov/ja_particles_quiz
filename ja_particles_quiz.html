@@ -13,6 +13,11 @@
       font-size: 16px;
       padding: 4px;
     }
+    .correct-answer {
+      margin-left: 8px;
+      font-weight: bold;
+      color: blue;
+    }
     #stats {
       margin-bottom: 10px;
       font-weight: bold;
@@ -68,16 +73,15 @@
       div.appendChild(translation);
 
       const sentence = document.createElement('p');
-      // Разбиваем предложение по разделителю "___"
+      // Разбиваем строку по разделителю "___"
       const parts = item.sentence_with_blanks.split('___');
-
       parts.forEach((part, idx) => {
-        // Вставляем текстовую часть предложения
+        // Добавляем текстовую часть предложения
         sentence.appendChild(document.createTextNode(part));
-        // Если ожидается частица – вставляем <select>
+        // Если нужно вставить выпадающий список для частицы
         if (idx < item.correct_particles.length) {
           const select = document.createElement('select');
-          // Опция по умолчанию, требующая явного выбора
+          // Опция по умолчанию (требует выбора)
           const defaultOption = document.createElement('option');
           defaultOption.value = '';
           defaultOption.text = '-- выберите --';
@@ -92,12 +96,11 @@
           sentence.appendChild(select);
         }
       });
-
       div.appendChild(sentence);
       container.appendChild(div);
     }
 
-    // Обработчик нажатия кнопки "Проверить"
+    // Обработчик кнопки "Проверить"
     document.getElementById('checkBtn').onclick = () => {
       const selects = document.querySelectorAll('select');
       const item = data[currentIndex];
@@ -105,8 +108,10 @@
       let sentenceScore = 0;
 
       selects.forEach((sel, idx) => {
+        // Для отладки
         console.log(`Select [${idx}]: выбранное значение = "${sel.value}", ожидаемое = "${correctParticles[idx]}"`);
-        // Если пользователь не выбрал значение
+        
+        // Если пользователь не сделал выбор
         if (!sel.value) {
           sel.style.backgroundColor = 'salmon';
           sel.style.border = '2px solid red';
@@ -118,7 +123,18 @@
           sel.style.backgroundColor = 'salmon';
           sel.style.border = '2px solid red';
         }
+        // Отключаем селект после проверки
         sel.disabled = true;
+        
+        // Добавляем элемент с правильным ответом рядом со селектом
+        const correctAnswerElement = document.createElement('span');
+        correctAnswerElement.classList.add("correct-answer");
+        correctAnswerElement.innerText = `Правильный ответ: ${correctParticles[idx]}`;
+        // Если рядом уже есть такой элемент, удалим его (на случай повторной проверки)
+        if (sel.nextSibling && sel.nextSibling.classList && sel.nextSibling.classList.contains("correct-answer")) {
+          sel.parentNode.removeChild(sel.nextSibling);
+        }
+        sel.parentNode.insertBefore(correctAnswerElement, sel.nextSibling);
       });
 
       totalCorrect += sentenceScore;
