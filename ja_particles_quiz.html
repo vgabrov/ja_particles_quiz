@@ -65,9 +65,18 @@
       const parts = item.sentence_with_blanks.split('___');
 
       parts.forEach((part, idx) => {
+        // Добавляем текст из части предложения
         sentence.append(part);
+        
+        // Если существует место для частицы, создаём выпадающий список
         if (idx < item.correct_particles.length) {
           const select = document.createElement('select');
+          // добавляем опцию по умолчанию, чтобы пользователь явно выбирал ответ
+          const defaultOption = document.createElement('option');
+          defaultOption.value = '';
+          defaultOption.text = '-- выберите --';
+          select.appendChild(defaultOption);
+
           item.all_options.forEach(opt => {
             const option = document.createElement('option');
             option.value = opt;
@@ -84,24 +93,26 @@
 
     document.getElementById('checkBtn').onclick = () => {
       const selects = document.querySelectorAll('select');
-      const userParticles = Array.from(selects).map(sel => sel.value);
-
       const item = data[currentIndex];
       const correctParticles = item.correct_particles;
-
-      let isCorrect = userParticles.length === correctParticles.length &&
-                      userParticles.every((val, idx) => val === correctParticles[idx]);
-
-      if (isCorrect) {
-        totalCorrect += correctParticles.length;
-      }
-      totalAnswered += correctParticles.length;
-      updateStats();
+      let sentenceScore = 0;
 
       selects.forEach((sel, idx) => {
-        sel.style.backgroundColor = (sel.value === correctParticles[idx]) ? 'lightgreen' : 'salmon';
+        // Если пользователь не выбрал значение, считаем как неправильный выбор
+        if (!sel.value) {
+          sel.style.backgroundColor = 'salmon';
+        } else if (sel.value.trim() === correctParticles[idx].trim()) {
+          sel.style.backgroundColor = 'lightgreen';
+          sentenceScore++;
+        } else {
+          sel.style.backgroundColor = 'salmon';
+        }
         sel.disabled = true;
       });
+
+      totalCorrect += sentenceScore;
+      totalAnswered += correctParticles.length;
+      updateStats();
     };
 
     document.getElementById('nextBtn').onclick = () => {
