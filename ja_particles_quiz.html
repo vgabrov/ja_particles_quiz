@@ -88,15 +88,20 @@
       let correctCount = 0;
       let total = selects.length;
 
-      // Составляем строку из выбранных пользователем частиц
+      // Восстанавливаем предложение из выбранных частиц
       let userSentence = '';
       selects.forEach(sel => {
         userSentence += sel.value;
       });
 
       const item = data[currentIndex];
-      const correctSentence = item.original_sentence.replace(/___/g, (match, index) => item.correct_particles[index] || '');
+      // Восстанавливаем правильное предложение с использованием правильных частиц
+      let correctSentence = item.original_sentence;
+      item.correct_particles.forEach((particle, idx) => {
+        correctSentence = correctSentence.replace('___', particle);
+      });
 
+      // Сравниваем восстановленное предложение с правильным
       if (userSentence === correctSentence) {
         correctCount = total; // Все частицы на месте, значит всё правильно
       }
