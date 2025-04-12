@@ -17,8 +17,12 @@
       margin-bottom: 10px;
       font-weight: bold;
     }
+    /* Явно задаём оформление для блока с правильным предложением */
+    #correctSentence {
+      margin-top: 20px;
+      display: block;
+    }
     .correct-visual {
-      margin-top: 10px;
       padding: 8px;
       background-color: #eef;
       border: 1px solid #99c;
@@ -29,7 +33,7 @@
 <body>
   <div id="stats">Правильных: 0 / 0 (0%)</div>
   <div id="quiz"></div>
-  <!-- Новый блок для отображения полного правильного предложения -->
+  <!-- Блок для показа верного предложения -->
   <div id="correctSentence"></div>
   <button id="checkBtn">Проверить</button>
   <button id="nextBtn">Следующее предложение</button>
@@ -63,18 +67,16 @@
       const quizContainer = document.getElementById('quiz');
       const correctSentenceContainer = document.getElementById('correctSentence');
       quizContainer.innerHTML = '';
-      // Очищаем блок с правильным предложением, если он был ранее заполнен
+      // Очистка блока с правильным предложением при новом вопросе
       correctSentenceContainer.innerHTML = '';
 
       const item = data[currentIndex];
       if (!item) return;
 
-      // Создаем элемент для перевода
       const translation = document.createElement('p');
       translation.innerText = `Перевод: ${item.english_translation}`;
       quizContainer.appendChild(translation);
 
-      // Создаем предложение с пропусками
       const sentenceContainer = document.createElement('p');
       const parts = item.sentence_with_blanks.split('___');
       parts.forEach((part, idx) => {
@@ -97,7 +99,7 @@
       quizContainer.appendChild(sentenceContainer);
     }
 
-    document.getElementById('checkBtn').onclick = () => {
+    document.getElementById('checkBtn').onclick = function() {
       const item = data[currentIndex];
       const selects = document.querySelectorAll('select');
       const correctParticles = item.correct_particles;
@@ -122,15 +124,12 @@
       totalAnswered += correctParticles.length;
       updateStats();
 
-      // Вывод полного правильного предложения
+      // Вывод полного правильного предложения через innerHTML
       const correctSentenceContainer = document.getElementById('correctSentence');
-      const correctSentenceElement = document.createElement('p');
-      correctSentenceElement.classList.add("correct-visual");
-      correctSentenceElement.innerText = `Верное предложение: ${item.original_sentence}`;
-      correctSentenceContainer.appendChild(correctSentenceElement);
+      correctSentenceContainer.innerHTML = `<p class="correct-visual">Верное предложение: ${item.original_sentence}</p>`;
     };
 
-    document.getElementById('nextBtn').onclick = () => {
+    document.getElementById('nextBtn').onclick = function() {
       if (currentIndex < data.length - 1) {
         currentIndex++;
         showQuestion();
