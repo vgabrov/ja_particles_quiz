@@ -10,7 +10,7 @@
   <script>
     async function loadQuiz() {
       try {
-        const response = await fetch('processed_sentences.json'); // Загрузка файла
+        const response = await fetch('https://github.com/vgabrov/ja_particles_quiz/blob/main/processed_sentences_half.json'); // Загрузка файла
         if (!response.ok) {
           throw new Error('Ошибка загрузки данных');
         }
