@@ -91,7 +91,9 @@
 
       selects.forEach(sel => {
         const expected = sel.dataset.correct;
-        if (sel.value === expected) {
+        const selected = sel.value;
+
+        if (selected === expected) {
           sel.style.backgroundColor = 'lightgreen';
           correctCount++;
         } else {
