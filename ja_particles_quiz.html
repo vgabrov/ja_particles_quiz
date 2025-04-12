@@ -11,14 +11,15 @@
 
   <script>
     let data = [];
-    let currentIndex = 0;
+    let currentIndex = 0; // Индекс текущего предложения
 
     async function loadQuiz() {
       try {
-        const response = await fetch('https://vgabrov.github.io/ja_particles_quiz/processed_sentences_half.json');
+        const response = await fetch('https://raw.githubusercontent.com/vgabrov/ja_particles_quiz/main/processed_sentences_half.json');
         if (!response.ok) throw new Error('Ошибка загрузки данных');
         data = await response.json();
-        showQuestion();
+        console.log('Загружено предложений:', data.length); // Логируем количество предложений
+        showQuestion(); // Показываем первое предложение сразу
       } catch (error) {
         console.error('Ошибка:', error);
       }
@@ -26,21 +27,25 @@
 
     function showQuestion() {
       const container = document.getElementById('quiz');
-      container.innerHTML = ''; // Очистка
+      container.innerHTML = ''; // Очистка контейнера перед выводом нового вопроса
 
+      // Проверяем, есть ли следующее предложение
       const item = data[currentIndex];
       if (!item) return;
 
       const div = document.createElement('div');
 
+      // Оригинальное предложение
       const original = document.createElement('p');
       original.innerText = `Оригинал: ${item.original_sentence}`;
       div.appendChild(original);
 
+      // Перевод
       const translation = document.createElement('p');
       translation.innerText = `Перевод: ${item.english_translation}`;
       div.appendChild(translation);
 
+      // Предложение с пропусками
       const sentence = document.createElement('p');
       let i = 0;
       const parts = item.sentence_with_blanks.split('___');
@@ -72,14 +77,14 @@
 
     document.getElementById('nextBtn').onclick = () => {
       if (currentIndex < data.length - 1) {
-        currentIndex++;
-        showQuestion();
+        currentIndex++; // Переходим к следующему предложению
+        showQuestion(); // Показываем следующее предложение
       } else {
         alert('Это было последнее предложение!');
       }
     };
 
-    loadQuiz();
+    loadQuiz(); // Загрузка данных и отображение первого вопроса
   </script>
 </body>
 </html>
