@@ -36,7 +36,6 @@
     let totalCorrect = 0;
     let totalAnswered = 0;
 
-    // Перемешивание массива
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -44,12 +43,10 @@
       }
     }
 
-    // Загрузка JSON с данными викторины
     async function loadQuiz() {
       try {
         const response = await fetch('https://raw.githubusercontent.com/vgabrov/ja_particles_quiz/main/processed_sentences_half.json');
-        if (!response.ok)
-          throw new Error('Ошибка загрузки данных');
+        if (!response.ok) throw new Error('Ошибка загрузки данных');
         data = await response.json();
         shuffle(data);
         showQuestion();
@@ -58,7 +55,6 @@
       }
     }
 
-    // Отображение текущего вопроса
     function showQuestion() {
       const container = document.getElementById('quiz');
       container.innerHTML = '';
@@ -73,15 +69,15 @@
       div.appendChild(translation);
 
       const sentence = document.createElement('p');
-      // Разбиваем строку по разделителю "___"
+      // Разбиваем предложение по разделителю "___"
       const parts = item.sentence_with_blanks.split('___');
       parts.forEach((part, idx) => {
         // Добавляем текстовую часть предложения
         sentence.appendChild(document.createTextNode(part));
-        // Если нужно вставить выпадающий список для частицы
+        // Если нужно вставить выпадающий список для пропущенной частицы
         if (idx < item.correct_particles.length) {
           const select = document.createElement('select');
-          // Опция по умолчанию (требует выбора)
+          // Опция по умолчанию, чтобы явно требовать выбора
           const defaultOption = document.createElement('option');
           defaultOption.value = '';
           defaultOption.text = '-- выберите --';
@@ -96,11 +92,11 @@
           sentence.appendChild(select);
         }
       });
+
       div.appendChild(sentence);
       container.appendChild(div);
     }
 
-    // Обработчик кнопки "Проверить"
     document.getElementById('checkBtn').onclick = () => {
       const selects = document.querySelectorAll('select');
       const item = data[currentIndex];
@@ -108,10 +104,7 @@
       let sentenceScore = 0;
 
       selects.forEach((sel, idx) => {
-        // Для отладки
         console.log(`Select [${idx}]: выбранное значение = "${sel.value}", ожидаемое = "${correctParticles[idx]}"`);
-        
-        // Если пользователь не сделал выбор
         if (!sel.value) {
           sel.style.backgroundColor = 'salmon';
           sel.style.border = '2px solid red';
@@ -123,18 +116,19 @@
           sel.style.backgroundColor = 'salmon';
           sel.style.border = '2px solid red';
         }
-        // Отключаем селект после проверки
         sel.disabled = true;
-        
-        // Добавляем элемент с правильным ответом рядом со селектом
+
+        // Удаляем элемент с правильным ответом, если он уже существует
+        const nextElem = sel.nextElementSibling;
+        if (nextElem && nextElem.classList.contains("correct-answer")) {
+          nextElem.remove();
+        }
+
+        // Создаем элемент с правильным ответом и вставляем его сразу после select
         const correctAnswerElement = document.createElement('span');
         correctAnswerElement.classList.add("correct-answer");
-        correctAnswerElement.innerText = `Правильный ответ: ${correctParticles[idx]}`;
-        // Если рядом уже есть такой элемент, удалим его (на случай повторной проверки)
-        if (sel.nextSibling && sel.nextSibling.classList && sel.nextSibling.classList.contains("correct-answer")) {
-          sel.parentNode.removeChild(sel.nextSibling);
-        }
-        sel.parentNode.insertBefore(correctAnswerElement, sel.nextSibling);
+        correctAnswerElement.innerText = ` Правильный: ${correctParticles[idx]}`;
+        sel.insertAdjacentElement('afterend', correctAnswerElement);
       });
 
       totalCorrect += sentenceScore;
@@ -142,7 +136,6 @@
       updateStats();
     };
 
-    // Обработчик кнопки "Следующее предложение"
     document.getElementById('nextBtn').onclick = () => {
       if (currentIndex < data.length - 1) {
         currentIndex++;
@@ -152,7 +145,6 @@
       }
     };
 
-    // Обновление статистики
     function updateStats() {
       const percent = totalAnswered === 0 ? 0 : ((totalCorrect / totalAnswered) * 100).toFixed(1);
       document.getElementById('stats').innerText = `Правильных: ${totalCorrect} / ${totalAnswered} (${percent}%)`;
