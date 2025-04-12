@@ -75,7 +75,6 @@
             select.appendChild(option);
           });
           select.dataset.correct = item.correct_particles[idx];
-          select.dataset.index = idx;
           sentence.appendChild(select);
         }
       });
@@ -89,17 +88,18 @@
       let correctCount = 0;
       let total = selects.length;
 
+      // Составляем строку из выбранных пользователем частиц
+      let userSentence = '';
       selects.forEach(sel => {
-        const expected = sel.dataset.correct;
-        const selected = sel.value;
-
-        if (selected === expected) {
-          sel.style.backgroundColor = 'lightgreen';
-          correctCount++;
-        } else {
-          sel.style.backgroundColor = 'lightcoral';
-        }
+        userSentence += sel.value;
       });
+
+      const item = data[currentIndex];
+      const correctSentence = item.original_sentence.replace(/___/g, (match, index) => item.correct_particles[index] || '');
+
+      if (userSentence === correctSentence) {
+        correctCount = total; // Все частицы на месте, значит всё правильно
+      }
 
       totalCorrect += correctCount;
       totalAnswered += total;
