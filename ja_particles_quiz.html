@@ -2,31 +2,58 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <!-- Мета-тег viewport для адаптивности на мобильных устройствах -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Japanese Particle Quiz</title>
   <style>
+    /* Базовые стили с использованием отностельных единиц */
     body {
       font-family: sans-serif;
-      padding: 20px;
+      padding: 2rem;
+      line-height: 1.5;
+      font-size: 1rem; /* базовый размер шрифта, который можно масштабировать */
     }
     select {
-      margin: 0 4px;
-      font-size: 16px;
-      padding: 4px;
+      margin: 0 0.25rem;
+      font-size: 1rem;
+      padding: 0.5rem;
+    }
+    button {
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem 0.25rem;
     }
     #stats {
-      margin-bottom: 10px;
+      margin-bottom: 1rem;
       font-weight: bold;
     }
     /* Блок для отображения полного правильного предложения */
     #correctSentence {
-      margin-top: 20px;
+      margin-top: 1.5rem;
       display: block;
     }
     .correct-visual {
-      padding: 8px;
+      padding: 0.75rem;
       background-color: #eef;
       border: 1px solid #99c;
       font-weight: bold;
+      font-size: 1rem;
+    }
+    
+    /* Media query для экранов меньше 600px */
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+        font-size: 1.125rem;  /* чуть увеличиваем размер шрифта для лучшей читаемости */
+      }
+      select, button {
+        font-size: 1.125rem;
+        padding: 0.75rem;
+      }
+      .correct-visual {
+        font-size: 1.125rem;
+        padding: 1rem;
+      }
     }
   </style>
 </head>
@@ -130,7 +157,6 @@
 
       // Создаем новый элемент с правильным предложением и добавляем его в блок
       const correctSentenceContainer = document.getElementById('correctSentence');
-      // Очистим содержимое, если оно уже было ранее заполнено
       correctSentenceContainer.innerHTML = '';
       const p = document.createElement('p');
       p.className = 'correct-visual';
